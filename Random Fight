@@ -1,0 +1,147 @@
+from selenium.webdriver.common.action_chains import ActionChains
+import random
+import time
+import tkinter as tk
+root = tk.Tk()
+# вход Рудольфа в игру
+browser2 = webdriver.Edge()
+browser2.get("https://darkagesworld.ru/")
+browser2.find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+browser2.find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('********')
+button = browser2.find_element(By.NAME, "op")
+button.click()
+time.sleep(25)
+# Вход Имя в игру
+browser = webdriver.Chrome()
+browser.get("https://darkagesworld.ru/")
+browser.find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+browser.find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('********')
+button = browser.find_element(By.NAME, "op").click()
+time.sleep(25)
+# Рудольф идет на арену
+element_to_hover_over = browser2.find_element(By.CLASS_NAME, "town_menu_span")
+hover = ActionChains(browser2).move_to_element(element_to_hover_over)
+hover.perform()
+browser2.find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+browser2.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(3) > input.alb_link").click()
+time.sleep(30)
+# Рудольф создает бой на арене, требуется ввод капчи и выбор боя
+browser2.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.fight_wrapper.arenas_wrapper.location_back_3.rfd > div.sv_main_block_body_fight > div.sv_main_block_header_menu_extra_1 > span").click()
+time.sleep(40)
+# Имя идет на арену и подтверждает:
+# Курсор наводится на элемент "Управление"
+element_to_hover_over = browser.find_element(By.CLASS_NAME, "town_menu_span")
+hover = ActionChains(browser).move_to_element(element_to_hover_over)
+hover.perform()
+# Открыть карту
+browser.find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+# Карта города и окрестностей
+browser.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(3) > input.alb_link").click()
+time.sleep(10)
+# Арена варваров
+browser.refresh()
+time.sleep(10)
+browser.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.fight_wrapper.arenas_wrapper.location_back_3.rfd > div.sv_main_block_body_table_fights_wrapper_1.sv_main_block_body_table_fights_wrapper.battles_search.battles_search_duels > div > div > div > div > div:nth-child(2) > span.sv_main_block_body_table_fights_span.fights_span_3 > form > input.fight_start_link").click()
+time.sleep(10)
+browser.refresh()
+browser2.refresh()
+time.sleep(10)
+try:
+  browser2.find_element(By.CSS_SELECTOR,"#block-svpageblock > div > div.fight_form.fight_form_hits > div > div.r_area.r_flex > div.wait_move_lost > div.r_flex.actions_end_fight > div > form > input.fight_end_link").click()
+  time.sleep(20)
+except NoSuchElementException:
+     for i in range(20):
+        randomNumber = random.randint(1, 4)
+        randomNumber2 = random.randint(5, 8)
+        randomNumber3 = random.randint(9, 12)
+        # Имя:Удар
+        if randomNumber == 1:
+            browser.find_element(By.CSS_SELECTOR, "#edit-hit-head").click()
+        elif randomNumber == 2:
+            browser.find_element(By.CSS_SELECTOR, "#edit-hit-body").click()
+        elif randomNumber == 3:
+            browser.find_element(By.CSS_SELECTOR, "#edit-hit-hands").click()
+        elif randomNumber == 4:
+            browser.find_element(By.CSS_SELECTOR, "#edit-hit-legs").click()
+        # Имя:Блок1
+        if randomNumber2 == 5:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def1-head").click()
+        elif randomNumber2 == 6:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def2-body").click()
+        elif randomNumber2 == 7:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def3-hands").click()
+        elif randomNumber2 == 8:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def4-legs").click()
+        # Имя:Блок2
+        if randomNumber3 == 9:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def1-head").click()
+        elif randomNumber3 == 10:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def2-body").click()
+        elif randomNumber3 == 11:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def3-hands").click()
+        elif randomNumber3 == 12:
+            browser.find_element(By.CSS_SELECTOR, "#edit-def4-legs").click()
+        browser.find_element(By.CSS_SELECTOR, "#submit_fight_move").click()
+
+        randomNumber = random.randint(1, 4)
+        randomNumber2 = random.randint(5, 8)
+        randomNumber3 = random.randint(9, 12)
+        # Рудольф:Удар
+        if randomNumber == 1:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-hit-head").click()
+        elif randomNumber == 2:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-hit-body").click()
+        elif randomNumber == 3:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-hit-hands").click()
+        elif randomNumber == 4:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-hit-legs").click()
+        # Рудольф:Блок1
+        if randomNumber2 == 5:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def1-head").click()
+        elif randomNumber2 == 6:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def2-body").click()
+        elif randomNumber2 == 7:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def3-hands").click()
+        elif randomNumber2 == 8:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def4-legs").click()
+        # Рудольф:Блок2
+        if randomNumber3 == 9:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def1-head").click()
+        elif randomNumber3 == 10:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def2-body").click()
+        elif randomNumber3 == 11:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def3-hands").click()
+        elif randomNumber3 == 12:
+            browser2.find_element(By.CSS_SELECTOR, "#edit-def4-legs").click()
+        browser2.find_element(By.CSS_SELECTOR, "#submit_fight_move").click()
+        browser.refresh()
+        browser2.refresh()
+        time.sleep(10)
+else:
+     browser.find_element(By.CSS_SELECTOR, "#block-svpageblock > div > div.fight_form.fight_form_hits > div > div.r_area.r_flex > div.wait_move_lost > div.r_flex.actions_end_fight > div > form > input.fight_end_link").click()
+     browser2.find_element(By.CSS_SELECTOR, "#block-svpageblock > div > div.fight_form.fight_form_hits > div > div.r_area.r_flex > div.wait_move_lost > div.r_flex.actions_end_fight > div > form > input.fight_end_link").click()
+     time.sleep(10)
+     browser.refresh()
+     browser2.refresh()
+     time.sleep(10)
+finally:
+    # Выход на арену
+    browser.refresh()
+    browser2.refresh()
+    browser.find_element(By.CSS_SELECTOR, "#block-svpageblock > div > div.fight_form.fight_form_hits > div > div.r_area.r_flex > div.wait_move_lost > div.r_flex.actions_end_fight > div > form > input.fight_end_link").click()
+    browser2.find_element(By.CSS_SELECTOR, "#block-svpageblock > div > div.fight_form.fight_form_hits > div > div.r_area.r_flex > div.wait_move_lost > div.r_flex.actions_end_fight > div > form > input.fight_end_link").click()
+    time.sleep(15)
+    # Имя идет в гостиницу
+    element_to_hover_over = browser.find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser.find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(11) > input.alb_link").click()
+    time.sleep(30)
+    # Рудольф идет в гостиницу
+    element_to_hover_over = browser2.find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser2).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser2.find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser2.find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(11) > input.alb_link").click()
+time.sleep(30)
