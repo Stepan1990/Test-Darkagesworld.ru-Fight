@@ -1,0 +1,374 @@
+from telnetlib import EC
+
+from selenium import webdriver
+from selenium.common import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+import random
+import pytest
+import requests
+import time
+import tkinter as tk
+
+from selenium.webdriver.support.wait import WebDriverWait
+
+root = tk.Tk()
+
+@pytest.fixture(scope="module")
+def browser_and_browser2(request):
+    # Открываем браузер и в случае падения теста закрываем Chrome и Edge
+    browser = webdriver.Chrome()
+    request.addfinalizer(browser.quit)
+    browser2 = webdriver.Edge()
+    request.addfinalizer(browser2.quit)
+    yield [browser, browser2]
+    # Закрываем браузер
+    browser.quit()
+    browser2.quit()
+
+@pytest.fixture(scope="module", autouse=True)
+def close_browsers():
+    yield
+    webdriver.Chrome().quit()
+    webdriver.Edge().quit()
+def test_login_and_simple_deal(browser_and_browser2):
+    #Вход Рудольфа в игру
+   try:
+    browser_and_browser2[1].get("https://darkagesworld.ru/")
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('********')
+    button = browser_and_browser2[1].find_element(By.NAME, "op")
+    button.click()
+    time.sleep(10)
+    # Вход Имя в игру
+    browser_and_browser2[0].get("https://darkagesworld.ru/")
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*********')
+    browser_and_browser2[0].find_element(By.NAME, "op").click()
+    time.sleep(10)
+    # Рудольф идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Имя идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Рудольф ищет Имя и добавляет вещь в сделку
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Имя')  # Ввод в строке поиска Имя
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Подтвердить поиск
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_27566_in").click()  # Вещь в сделку
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_ready").click()  # Подтвердить готовность
+    time.sleep(5)
+    # Имя ищет Рудольфа и добавляет дт в сделку
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Рудольф')  # Вбить в поиск Рудольф
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Нажать искать
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-money-input").send_keys('15')  # Добавить дт в сделку
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#money_in").click()  # Подтвердить добавление дт
+    time.sleep(10)
+    # Рудольф и Имя подтверждают
+    time.sleep(10)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Имя подтверждает
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Рудольф подтверждает
+    time.sleep(5)
+    browser_and_browser2[1].refresh()
+    time.sleep(5)
+    browser_and_browser2[0].refresh()
+    time.sleep(10)
+   except Exception as e:
+    print(f"An error occurred: {e}") #По идеи должно проверять сообщение в чате...
+   finally:
+    browser_and_browser2[1].quit()
+    browser_and_browser2[0].quit()
+@pytest.mark.order2
+def test_cancel_buyer(browser_and_browser2):
+   try:
+    # Вход Рудольфа в игру
+    browser_and_browser2[1].get("https://darkagesworld.ru/")
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*********')
+    button = browser_and_browser2[1].find_element(By.NAME, "op")
+    button.click()
+    time.sleep(10)
+    # Вход Имя в игру
+    browser_and_browser2[0].get("https://darkagesworld.ru/")
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('**********')
+    browser_and_browser2[0].find_element(By.NAME, "op").click()
+    time.sleep(10)
+    # Рудольф идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Имя идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Рудольф ищет Имя и добавляет вещь в сделку
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Имя')  # Ввод в строке поиска Имя
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Подтвердить поиск
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_27446_in").click()  # Вещь в сделку
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_ready").click()  # Подтвердить готовность
+    time.sleep(5)
+    # Имя ищет Рудольфа и добавляет дт в сделку
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Рудольф')  # Вбить в поиск Рудольф
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Нажать искать
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-money-input").send_keys('20')  # Добавить дт в сделку
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#money_in").click()  # Подтвердить добавление дт
+    time.sleep(20)
+    # Рудольф подтверждает, Имя отменяет
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Рудольф подтверждает
+    time.sleep(10)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trade-cancel").click()  # Имя отменяет
+    time.sleep(20)
+    browser_and_browser2[1].refresh()
+    browser_and_browser2[0].refresh()
+    time.sleep(10)
+   except Exception as e:
+    print(f"Ошибка: {e}")
+   finally:
+    WebDriverWait(browser_and_browser2[1], 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='ch_message'][contains(text(), 'Вы продали')]")))
+    browser_and_browser2[1].quit()
+    browser_and_browser2[0].quit()
+@pytest.mark.order3
+def test_transaction_bot_and_res(browser_and_browser2):
+    # Вход Рудольфа в игру
+   try:
+    browser_and_browser2[1] = webdriver.Edge()
+    browser_and_browser2[1].get("https://darkagesworld.ru/")
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*********')
+    button = browser_and_browser2[1].find_element(By.NAME, "op")
+    button.click()
+    time.sleep(10)
+    # Вход Имя в игру
+    browser_and_browser2[0].get("https://darkagesworld.ru/")
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('**********')
+    browser_and_browser2[0].find_element(By.NAME, "op").click()
+    time.sleep(10)
+    # Рудольф идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Имя идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Сделка:Тест продажа реса + вещь
+    # Добавление в сделку рес + вещь
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Имя') #Ввод Имя для поиска
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#find_trader").click() #Поиск Имя
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_27565_in").click() #Вещь в сделку
+    time.sleep(10)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#res_20640_in").click() #Рес в сделку
+    time.sleep(10)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#stuff_ready").click() #Подтвердить готовность
+    time.sleep(10)
+    # Имя ищет Рудольфа
+    # Имя вводит дт и подтверждает
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Рудольф') #Имя ищет Рудольфа
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#find_trader").click() #Поиск
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-money-input").send_keys('40') #Ввод дт
+    time.sleep(10)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#money_in").click() #Деньги в сделку
+    time.sleep(10)
+    # Рудольф и Имя подтверждают сделку
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click() #Имя подтверждает
+    time.sleep(10)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click() #Рудольф подтверждает
+    time.sleep(30)
+    browser_and_browser2[1].refresh()
+    browser_and_browser2[0].refresh()
+    time.sleep(10)
+   except Exception as e:
+    print(f"An error occurred: {e}")
+   finally:
+       browser_and_browser2[1].quit()
+       browser_and_browser2[0].quit()
+@pytest.mark.order4
+def test_transaction_minus_one_res(browser_and_browser2):
+    # Вход Рудольфа
+   try:
+    browser_and_browser2[0] = webdriver.Edge()
+    browser_and_browser2[0].get("https://darkagesworld.ru/")
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('********')
+    button = browser_and_browser2[0].find_element(By.NAME, "op")
+    button.click()
+    time.sleep(10)
+    # Вход Имя в игру
+    browser_and_browser2[1] = webdriver.Chrome()
+    browser_and_browser2[1].get("https://darkagesworld.ru/")
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*******')
+    browser_and_browser2[1].find_element(By.NAME, "op").click()
+    time.sleep(10)
+    # Рудольф идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Имя идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Проверка продажи реса в скупку и возобновления сделки
+    # Рудольф ищет Имя и добавляет рес в сделку
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Имя')  # Ввод Имя для поиска
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Поиск Имя
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#res_20638_in").click()  # Рес в сделку
+    time.sleep(10)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#stuff_ready").click()  # Подтвердить готовность
+    # Имя ищет Рудольфа и добавляет дт
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Рудольф')  # Вбить в поиск Рудольф
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Нажать искать
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-money-input").send_keys('3')  # Добавить дт в сделку
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#money_in").click()  # Подтвердить добавление дт
+    time.sleep(5)
+    # Продажа реса в скупку
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(26) > input.alb_link").click()
+    time.sleep(7)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#loc_menu_span_26").click()  # Выбор руда
+    time.sleep(7)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.sv_main_block_wrapper.location_back.location_back_26 > div.sv_main_block_body > div > div > div.sv_main_block_body_table_column.sv_main_block_body_table_column_quantity.sv_main_block_body_table_column_quantity_sell > div.sv_main_block_body_table_item.sv_main_block_body_table_item_2").send_keys('1')  # Выбор 1 серы
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#submit_ava_mine").click()  # Подтвердить продажу
+    time.sleep(5)
+    # Вернуться в торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()  # Переход в торговую палату
+    time.sleep(15)
+    # Продолжить сделку без реса
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Имя подтверждает
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Рудольф подтверждает
+    time.sleep(10)
+    browser_and_browser2[1].refresh()
+    browser_and_browser2[0].refresh()
+    time.sleep(10)
+   except Exception as e:
+    print(f"An error occurred: {e}")
+   finally:
+    browser_and_browser2[1].quit()
+    browser_and_browser2[0].quit()
+@pytest.mark.order5
+def test_Transaction_Out_of_Location(browser_and_browser2):
+    # Вход Рудольфа
+   try:
+    browser_and_browser2[0] = webdriver.Edge()
+    browser_and_browser2[0].get("https://darkagesworld.ru/")
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('Рудольф')
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*********')
+    button = browser_and_browser2[0].find_element(By.NAME, "op")
+    button.click()
+    time.sleep(10)
+    # Вход Имя в игру
+    browser_and_browser2[1] = webdriver.Chrome()
+    browser_and_browser2[1].get("https://darkagesworld.ru/")
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-name").send_keys('имя')
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-pass").send_keys('*********')
+    browser_and_browser2[1].find_element(By.NAME, "op").click()
+    time.sleep(10)
+    # Рудольф идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Имя идет в Торговые палаты
+    element_to_hover_over = browser_and_browser2[1].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[1]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(27)").click()
+    time.sleep(10)
+    # Проверка попытки вернуться в сделку после выхода на другую локация и возвращению обратно в сделку
+    # Рудольф ищет Имя и добавляет вещь в сделку
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Имя')  # Ввод в строке поиска Имя
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Подтвердить поиск
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#res_20617_in").click()  # Вещь в сделку
+    time.sleep(5)
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#stuff_ready").click()  # Подтвердить готовность
+    time.sleep(5)
+    # Имя ищет Рудольфа и добавляет дт в сделку
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trader-input").send_keys('Рудольф')  # Вбить в поиск Рудольф
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#find_trader").click()  # Нажать искать
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-money-input").send_keys('30')  # Добавить дт в сделку
+    time.sleep(5)
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#money_in").click()  # Подтвердить добавление дт
+    time.sleep(20)
+    # Рудольф выходит с локации
+    element_to_hover_over = browser_and_browser2[0].find_element(By.CLASS_NAME, "town_menu_span")
+    hover = ActionChains(browser_and_browser2[0]).move_to_element(element_to_hover_over)
+    hover.perform()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-userstats > div.user_info > div.info_block > div.town_menu > div.town_menu_list_wrapper > div > span.town_menu_list_span.cpointer.open_map").click()
+    browser_and_browser2[0].find_element(By.CSS_SELECTOR, "#block-svpageblock > div.town_map_wrapper.font-10pt > div.town_map > div.alb_locations > form:nth-child(11) > input.alb_link").click()
+    time.sleep(10)
+    # Рудольф и Имя подтверждают
+    browser_and_browser2[1].find_element(By.CSS_SELECTOR, "#edit-trade-confirm").click()  # Имя подтверждает
+    time.sleep(10)
+    browser_and_browser2[1].refresh()
+    browser_and_browser2[0].refresh()
+    time.sleep(10)
+   except Exception as e:
+    print(f"An error occurred: {e}")
+   finally:
+    browser_and_browser2[1].quit()
+    browser_and_browser2[0].quit()
